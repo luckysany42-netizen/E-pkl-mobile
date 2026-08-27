@@ -82,7 +82,10 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = UserModel.fromJson(data['user']);
       final token = data['token'] as String;
 
-      await StorageHelper.saveToken(token);
+      // SENGAJA TIDAK menyimpan token di sini (beda dengan login()).
+      // Backend register() sebenarnya sudah mengeluarkan token yang valid,
+      // tapi keputusan produk: user daftar dulu -> diarahkan manual ke
+      // halaman Login, bukan auto-masuk ke Beranda.
 
       return Result.success((user: user, token: token));
     } on DioException catch (e) {

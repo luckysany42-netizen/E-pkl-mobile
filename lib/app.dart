@@ -37,7 +37,9 @@ class EpklApp extends StatelessWidget {
           listener: (context, state) {},
           builder: (context, state) {
             if (state is AuthAuthenticated) return const MainNavigationPage();
-            if (state is AuthUnauthenticated || state is AuthFailure) {
+            if (state is AuthUnauthenticated ||
+                state is AuthFailure ||
+                state is AuthRegisterSuccess) {
               return const LoginPage();
             }
             // AuthInitial / AuthLoading -> splash sederhana sambil cek token

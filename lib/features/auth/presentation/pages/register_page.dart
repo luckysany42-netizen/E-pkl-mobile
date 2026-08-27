@@ -54,8 +54,15 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             );
           }
-          // AuthAuthenticated -> root widget (app.dart) otomatis pindah ke
-          // Beranda, tidak perlu Navigator manual di sini.
+          if (state is AuthRegisterSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Registrasi berhasil! Silakan masuk.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.of(context).pop();
+          }
         },
         builder: (context, state) {
           final isLoading = state is AuthLoading;

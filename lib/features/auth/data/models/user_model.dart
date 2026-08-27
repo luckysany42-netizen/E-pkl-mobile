@@ -46,9 +46,8 @@ class UserModel {
   bool get isAtasan => roles.contains('atasan');
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Field 'role' dan 'permission' dari backend kadang berupa List<String>,
-    // kadang List<Map> (nama role di key 'name') tergantung versi Spatie.
-    // Ditangani dua-duanya biar aman.
+    // Field 'permission' dari backend berupa List<String> (hasil ->pluck('name')),
+    // jadi List biasa aman diparsing pakai helper ini.
     List<String> parseNames(dynamic raw) {
       if (raw == null) return [];
       if (raw is List) {
@@ -57,6 +56,17 @@ class UserModel {
             .whereType<String>()
             .toList();
       }
+      return [];
+    }
+
+    // PENTING: field 'role' dari backend BUKAN array, melainkan SATU OBJECT
+    // role tunggal (lihat User::getRoleAttribute() di Laravel yang balikin
+    // $roles->first() / hasil firstWhere, bukan list). Makanya butuh parser
+    // terpisah dari 'permission' yang memang array.
+    List<String> parseRole(dynamic raw) {
+      if (raw == null) return [];
+      if (raw is Map && raw['name'] != null) return [raw['name'].toString()];
+      if (raw is List) return parseNames(raw); // jaga-jaga kalau backend berubah jadi array
       return [];
     }
 
@@ -80,8 +90,8 @@ class UserModel {
           ? null
           : int.tryParse(json['atasan_id'].toString()),
       status: json['status'] ?? 'aktif',
-      roles: parseNames(json['role'] ?? json['roles']),
-      permissions: parseNames(json['permission'] ?? json['permissions']),
+      roles: parseRole(json['role']),
+      permissions: parseNames(json['permission']),
     );
   }
 }

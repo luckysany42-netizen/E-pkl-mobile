@@ -50,6 +50,11 @@ class AppStrings {
     },
     'minggu_ini': {AppLanguage.id: 'Minggu Ini', AppLanguage.en: 'This Week'},
     'bulan_ini': {AppLanguage.id: 'Bulan Ini', AppLanguage.en: 'This Month'},
+    // Versi PENDEK khusus dipakai di chip toggle kecil (bukan judul section),
+    // supaya tidak overflow di layar sempit saat bahasa Inggris dipilih
+    // ("This Week"/"This Month" kepanjangan untuk chip sekecil itu).
+    'toggle_minggu': {AppLanguage.id: 'Minggu', AppLanguage.en: 'Week'},
+    'toggle_bulan': {AppLanguage.id: 'Bulan', AppLanguage.en: 'Month'},
     'belum_ada_riwayat': {
       AppLanguage.id: 'Belum ada riwayat kehadiran',
       AppLanguage.en: 'No attendance history yet',

@@ -95,9 +95,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     if (result.isSuccess) {
-      // Akun baru daftar sendiri di sini otomatis dapat role karyawan
-      // (default backend), jadi tidak perlu dicek _isAllowedOnMobile lagi.
-      emit(AuthAuthenticated(result.data!.user));
+      // SENGAJA tidak emit AuthAuthenticated di sini (lihat dokumentasi di
+      // AuthRegisterSuccess). Backend sebenarnya balikin token yang valid,
+      // tapi repository.register() sudah diubah untuk TIDAK menyimpannya
+      // (lihat auth_repository_impl.dart), jadi user harus login manual.
+      emit(const AuthRegisterSuccess());
+      emit(const AuthUnauthenticated());
     } else {
       emit(AuthFailure(result.errorMessage ?? 'Registrasi gagal'));
     }

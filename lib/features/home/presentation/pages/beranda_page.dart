@@ -148,15 +148,20 @@ class _BerandaPageState extends State<BerandaPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        _range == _HistoryRange.week
-                            ? context.tr('kehadiran_minggu_ini')
-                            : context.tr('kehadiran_bulan_ini'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          _range == _HistoryRange.week
+                              ? context.tr('kehadiran_minggu_ini')
+                              : context.tr('kehadiran_bulan_ini'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       _RangeToggle(
                         range: _range,
                         onChanged: (r) => setState(() => _range = r),
@@ -371,8 +376,8 @@ class _RangeToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _rangeChip(context, _HistoryRange.week, context.tr('minggu_ini')),
-          _rangeChip(context, _HistoryRange.month, context.tr('bulan_ini')),
+          _rangeChip(context, _HistoryRange.week, context.tr('toggle_minggu')),
+          _rangeChip(context, _HistoryRange.month, context.tr('toggle_bulan')),
         ],
       ),
     );
@@ -383,7 +388,7 @@ class _RangeToggle extends StatelessWidget {
     return GestureDetector(
       onTap: () => onChanged(value),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: selected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
@@ -391,7 +396,7 @@ class _RangeToggle extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: selected ? FontWeight.bold : FontWeight.normal,
           ),
         ),

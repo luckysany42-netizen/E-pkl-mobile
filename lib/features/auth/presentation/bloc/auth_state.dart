@@ -36,3 +36,11 @@ class AuthFailure extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Dipancarkan sesaat setelah Daftar berhasil (SEBELUM AuthUnauthenticated).
+/// Sengaja TIDAK auto-login: sesuai keputusan produk, user daftar dulu lalu
+/// diarahkan balik ke form Login secara manual. RegisterPage dengar state
+/// ini untuk nampilin snackbar sukses + pop kembali ke LoginPage.
+class AuthRegisterSuccess extends AuthState {
+  const AuthRegisterSuccess();
+}
