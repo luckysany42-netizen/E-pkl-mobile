@@ -13,12 +13,29 @@ class ApiEndpoints {
   static const String baseUrl = '$_host/api';
 
   /// Field seperti `photo`, `foto` dari backend cuma path relatif
-  /// (contoh: "/storage/photos/xxx.png"). Pakai ini buat dapetin URL utuh
-  /// yang bisa dipakai Image.network / CachedNetworkImage.
-  static String assetUrl(String? relativePath) {
-    if (relativePath == null || relativePath.isEmpty) return '';
+  /// (contoh: "journals/xxx.png", TANPA prefix "/storage/" -- ini konvensi
+  /// dari UserController/AttendanceController/JournalController yang
+  /// nyimpen hasil ->store() apa adanya, beda dengan SettingController/
+  /// Landing* yang eksplisit nambahin '/storage/' sendiri sebelum simpan
+  /// ke DB). Pakai method ini buat dapetin URL utuh yang bisa dipakai
+  /// Image.network / CachedNetworkImage.
+  ///
+  /// PENTING: balikin null (bukan string kosong '') kalau tidak ada foto.
+  /// Image.network('') akan CRASH dengan error "Invalid argument(s): No
+  /// host specified in URI file:///" -- jadi null di sini wajib supaya
+  /// widget yang manggil bisa cek `if (url != null)` dengan benar.
+  static String? assetUrl(String? relativePath) {
+    if (relativePath == null || relativePath.isEmpty) return null;
     if (relativePath.startsWith('http')) return relativePath;
-    final path = relativePath.startsWith('/') ? relativePath : '/$relativePath';
+
+    var path = relativePath.startsWith('/') ? relativePath : '/$relativePath';
+
+    // Tambahkan '/storage/' kalau belum ada -- lihat catatan di atas soal
+    // kenapa mayoritas field foto dari backend butuh ini ditambahkan manual.
+    if (!path.startsWith('/storage/')) {
+      path = '/storage$path';
+    }
+
     return '$_host$path';
   }
 
@@ -56,6 +73,7 @@ class ApiEndpoints {
   // JOURNAL
   // ---------------------------------------------------------------------
   static const String journals = '/journals';
+  static const String journalHistory = '/journals/history';
   static String journalApprove(String id) => '/journals/$id/approve';
   static String journalReject(String id) => '/journals/$id/reject';
 

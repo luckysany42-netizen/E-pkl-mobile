@@ -12,6 +12,8 @@ import '../../../../core/language/language_cubit.dart';
 import '../../../../core/language/server_value_translator.dart';
 import '../../../attendance/data/models/attendance_model.dart';
 import '../../../attendance/presentation/bloc/attendance_bloc.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../widgets/internship_progress_card.dart';
 
 enum _HistoryRange { week, month }
 
@@ -97,6 +99,28 @@ class _BerandaPageState extends State<BerandaPage> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   const _TopBar(),
+                  const SizedBox(height: 16),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, authState) {
+                      if (authState is! AuthAuthenticated) {
+                        return const SizedBox.shrink();
+                      }
+                      final user = authState.user;
+                      // Card hanya muncul kalau tanggalMulai & tanggalSelesai
+                      // ada isinya (beberapa intern mungkin belum diisi
+                      // datanya oleh HR/admin di web).
+                      if (user.tanggalMulai == null || user.tanggalSelesai == null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: InternshipProgressCard(
+                          startDate: user.tanggalMulai!,
+                          endDate: user.tanggalSelesai!,
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     context.tr('pilih_kehadiran'),

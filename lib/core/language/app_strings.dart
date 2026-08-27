@@ -18,6 +18,16 @@ class AppStrings {
       AppLanguage.id: 'Pilih Kehadiran',
       AppLanguage.en: 'Select Attendance',
     },
+    'progress_magang': {
+      AppLanguage.id: 'Progress Magang',
+      AppLanguage.en: 'Internship Progress',
+    },
+    'hari_ke': {AppLanguage.id: 'Hari ke', AppLanguage.en: 'Day'},
+    'dari': {AppLanguage.id: 'dari', AppLanguage.en: 'of'},
+    'selesai_pada': {
+      AppLanguage.id: 'Selesai pada',
+      AppLanguage.en: 'Ends on',
+    },
     'masuk': {AppLanguage.id: 'Masuk', AppLanguage.en: 'Check In'},
     'pulang': {AppLanguage.id: 'Pulang', AppLanguage.en: 'Check Out'},
     'presensi_pagi': {
@@ -117,6 +127,48 @@ class AppStrings {
       AppLanguage.id: 'Absen masuk dulu sebelum absen pulang',
       AppLanguage.en: 'Check in first before checking out',
     },
+    'tambah_jurnal': {
+      AppLanguage.id: 'Tambah Jurnal',
+      AppLanguage.en: 'Add Journal',
+    },
+    'belum_ada_jurnal': {
+      AppLanguage.id: 'Belum ada jurnal',
+      AppLanguage.en: 'No journal entries yet',
+    },
+    'tanggal': {AppLanguage.id: 'Tanggal', AppLanguage.en: 'Date'},
+    'aktivitas': {AppLanguage.id: 'Aktivitas', AppLanguage.en: 'Activities'},
+    'tambah_aktivitas': {
+      AppLanguage.id: 'Tambah Aktivitas',
+      AppLanguage.en: 'Add Activity',
+    },
+    'jam_mulai': {AppLanguage.id: 'Jam Mulai', AppLanguage.en: 'Start Time'},
+    'jam_selesai': {AppLanguage.id: 'Jam Selesai', AppLanguage.en: 'End Time'},
+    'kegiatan': {
+      AppLanguage.id: 'Kegiatan',
+      AppLanguage.en: 'Activity Description',
+    },
+    'foto_bukti_opsional': {
+      AppLanguage.id: 'Foto Bukti (opsional)',
+      AppLanguage.en: 'Proof Photo (optional)',
+    },
+    'simpan_jurnal': {
+      AppLanguage.id: 'Simpan Jurnal',
+      AppLanguage.en: 'Save Journal',
+    },
+    'jurnal_berhasil_disimpan': {
+      AppLanguage.id: 'Jurnal berhasil disimpan',
+      AppLanguage.en: 'Journal saved successfully',
+    },
+    'catatan_penolakan': {
+      AppLanguage.id: 'Catatan Penolakan',
+      AppLanguage.en: 'Rejection Note',
+    },
+    'tutup': {AppLanguage.id: 'Tutup', AppLanguage.en: 'Close'},
+    'lengkapi_minimal_1_aktivitas': {
+      AppLanguage.id: 'Lengkapi minimal 1 aktivitas dengan benar',
+      AppLanguage.en: 'Complete at least 1 activity correctly',
+    },
+    'pilih_foto': {AppLanguage.id: 'Pilih Foto', AppLanguage.en: 'Pick Photo'},
   };
 
   static String t(String key, AppLanguage lang) {

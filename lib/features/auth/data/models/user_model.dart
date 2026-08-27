@@ -72,7 +72,9 @@ class UserModel {
 
     DateTime? parseDate(dynamic raw) {
       if (raw == null || raw.toString().isEmpty) return null;
-      return DateTime.tryParse(raw.toString());
+      // .toLocal() konsisten dengan journal_model.dart & attendance_model.dart
+      // (lihat komentar di sana untuk penjelasan bug mundur 1 harinya).
+      return DateTime.tryParse(raw.toString())?.toLocal();
     }
 
     return UserModel(

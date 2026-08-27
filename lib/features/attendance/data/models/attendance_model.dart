@@ -32,7 +32,10 @@ class AttendanceModel {
   factory AttendanceModel.fromJson(Map<String, dynamic> json) {
     return AttendanceModel(
       id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
-      date: DateTime.parse(json['date'].toString()),
+      // .toLocal() WAJIB: sama seperti di journal_model.dart, backend
+      // ngirim tanggal ber-sufiks "Z" (UTC), tanpa konversi ini tanggal
+      // bisa mundur 1 hari saat ditampilkan.
+      date: DateTime.parse(json['date'].toString()).toLocal(),
       checkInTime: json['check_in_time'],
       checkInPhoto: json['check_in_photo'],
       checkOutTime: json['check_out_time'],

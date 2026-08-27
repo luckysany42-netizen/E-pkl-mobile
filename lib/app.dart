@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/attendance/presentation/bloc/attendance_bloc.dart';
+import 'features/journal/presentation/bloc/journal_bloc.dart';
 import 'features/home/presentation/pages/main_navigation_page.dart';
 
 class EpklApp extends StatelessWidget {
@@ -22,8 +23,9 @@ class EpklApp extends StatelessWidget {
           create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
         ),
         BlocProvider<AttendanceBloc>(create: (_) => sl<AttendanceBloc>()),
-        // TODO: tambahkan BlocProvider untuk JournalBloc, TaskBloc,
-        // FaceRecognitionBloc di sini
+        BlocProvider<JournalBloc>(create: (_) => sl<JournalBloc>()),
+        // TODO: tambahkan BlocProvider untuk TaskBloc, FaceRecognitionBloc
+        // di sini
       ],
       child: MaterialApp(
         title: 'E-PKL Mobile',

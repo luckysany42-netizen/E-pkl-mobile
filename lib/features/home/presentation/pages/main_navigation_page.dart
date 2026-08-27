@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/language/app_strings.dart';
 import '../../../../core/widgets/coming_soon_page.dart';
+import '../../../journal/presentation/pages/journal_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import 'beranda_page.dart';
 
@@ -23,7 +24,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   static final _pages = [
     const BerandaPage(),
     const ComingSoonPage(title: 'Tugas', icon: Icons.assignment_outlined),
-    const ComingSoonPage(title: 'Jurnal', icon: Icons.book_outlined),
+    const JournalPage(),
     const ProfilePage(),
   ];
 
