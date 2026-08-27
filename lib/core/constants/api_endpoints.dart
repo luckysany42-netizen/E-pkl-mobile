@@ -1,0 +1,71 @@
+/// Kumpulan endpoint API, mengikuti struktur routes/api.php di project Laravel
+/// (E-pkl-main). Sesuaikan [baseUrl] dengan alamat server backend kamu.
+///
+/// Kamu testing pakai HP fisik (bukan emulator) yang konek ke laptop lewat
+/// WiFi yang sama, jadi HARUS pakai IP LAN laptop, bukan localhost/10.0.2.2.
+/// Cek IP LAN laptop lewat: ipconfig (cari "IPv4 Address" di adapter WiFi).
+/// Kalau IP laptop berubah (misal ganti WiFi / restart router), update lagi
+/// nilai di bawah ini.
+class ApiEndpoints {
+  ApiEndpoints._();
+
+  static const String _host = 'http://192.168.112.210:8000';
+  static const String baseUrl = '$_host/api';
+
+  /// Field seperti `photo`, `foto` dari backend cuma path relatif
+  /// (contoh: "/storage/photos/xxx.png"). Pakai ini buat dapetin URL utuh
+  /// yang bisa dipakai Image.network / CachedNetworkImage.
+  static String assetUrl(String? relativePath) {
+    if (relativePath == null || relativePath.isEmpty) return '';
+    if (relativePath.startsWith('http')) return relativePath;
+    final path = relativePath.startsWith('/') ? relativePath : '/$relativePath';
+    return '$_host$path';
+  }
+
+  // ---------------------------------------------------------------------
+  // AUTH
+  // ---------------------------------------------------------------------
+  static const String register = '/auth/register';
+  static const String registerWithFace = '/auth/register-with-face';
+  static const String login = '/auth/login';
+  static const String logout = '/auth/logout';
+  static const String me = '/auth/me';
+
+  // ---------------------------------------------------------------------
+  // FACE RECOGNITION
+  // ---------------------------------------------------------------------
+  static const String faceProfiles = '/face/profiles';
+  static const String faceLogin = '/face/login';
+  static const String faceRegister = '/face/register';
+
+  // ---------------------------------------------------------------------
+  // PROFILE
+  // ---------------------------------------------------------------------
+  static const String profile = '/profile';
+  static const String changeEmail = '/profile/change-email';
+  static const String changePassword = '/profile/change-password';
+
+  // ---------------------------------------------------------------------
+  // TASK / INTERN
+  // ---------------------------------------------------------------------
+  static const String internTasks = '/intern/tasks';
+  static const String tasks = '/tasks';
+  static String taskStatus(String taskId) => '/tasks/$taskId/status';
+
+  // ---------------------------------------------------------------------
+  // JOURNAL
+  // ---------------------------------------------------------------------
+  static const String journals = '/journals';
+  static String journalApprove(String id) => '/journals/$id/approve';
+  static String journalReject(String id) => '/journals/$id/reject';
+
+  // ---------------------------------------------------------------------
+  // ATTENDANCE
+  // ---------------------------------------------------------------------
+  static const String attendances = '/attendances';
+
+  // ---------------------------------------------------------------------
+  // SETTING
+  // ---------------------------------------------------------------------
+  static const String setting = '/setting';
+}
