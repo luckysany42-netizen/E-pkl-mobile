@@ -17,6 +17,18 @@ class ServerValueTranslator {
     'aktif': {AppLanguage.id: 'Aktif', AppLanguage.en: 'Active'},
     'selesai': {AppLanguage.id: 'Selesai', AppLanguage.en: 'Completed'},
     'nonaktif': {AppLanguage.id: 'Nonaktif', AppLanguage.en: 'Inactive'},
+    // status task
+    'belum': {AppLanguage.id: 'Belum Dikerjakan', AppLanguage.en: 'Not Started'},
+    'sedang': {AppLanguage.id: 'Sedang Dikerjakan', AppLanguage.en: 'In Progress'},
+    'submitted': {
+      AppLanguage.id: 'Menunggu Review',
+      AppLanguage.en: 'Pending Review',
+    },
+    'ditolak': {AppLanguage.id: 'Ditolak', AppLanguage.en: 'Rejected'},
+    'revisi': {
+      AppLanguage.id: 'Perlu Revisi',
+      AppLanguage.en: 'Needs Revision',
+    },
     // status journal / task
     'pending': {AppLanguage.id: 'Menunggu', AppLanguage.en: 'Pending'},
     'approved': {AppLanguage.id: 'Disetujui', AppLanguage.en: 'Approved'},

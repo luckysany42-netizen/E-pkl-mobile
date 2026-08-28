@@ -68,6 +68,7 @@ class ApiEndpoints {
   static const String internTasks = '/intern/tasks';
   static const String tasks = '/tasks';
   static String taskStatus(String taskId) => '/tasks/$taskId/status';
+  static String taskSubmit(String taskId) => '/tasks/$taskId/submit';
 
   // ---------------------------------------------------------------------
   // JOURNAL

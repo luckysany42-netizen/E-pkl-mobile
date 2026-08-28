@@ -452,6 +452,7 @@ class _HistoryList extends StatelessWidget {
     final dateFormat = DateFormat('EEEE, dd/MM/yyyy', 'id_ID');
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: items.expand((a) sync* {
         if (a.hasCheckedIn) {
           yield _HistoryTile(

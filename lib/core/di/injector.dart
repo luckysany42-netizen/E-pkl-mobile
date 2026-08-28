@@ -11,6 +11,9 @@ import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../../features/journal/data/repositories/journal_repository_impl.dart';
 import '../../features/journal/domain/repositories/journal_repository.dart';
 import '../../features/journal/presentation/bloc/journal_bloc.dart';
+import '../../features/task/data/repositories/task_repository_impl.dart';
+import '../../features/task/domain/repositories/task_repository.dart';
+import '../../features/task/presentation/bloc/task_bloc.dart';
 
 final GetIt sl = GetIt.instance; // "sl" = service locator
 
@@ -42,6 +45,12 @@ Future<void> initDependencies() async {
   );
   sl.registerFactory<JournalBloc>(() => JournalBloc(sl<JournalRepository>()));
 
+  // Task
+  sl.registerLazySingleton<TaskRepository>(
+    () => TaskRepositoryImpl(sl<ApiClient>()),
+  );
+  sl.registerFactory<TaskBloc>(() => TaskBloc(sl<TaskRepository>()));
+
   // TODO: daftarkan repository & bloc fitur lain di sini kalau sudah dibuat
-  // (task, profile, face_recognition)
+  // (profile, face_recognition)
 }

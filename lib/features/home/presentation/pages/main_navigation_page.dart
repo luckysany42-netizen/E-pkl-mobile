@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/language/app_strings.dart';
-import '../../../../core/widgets/coming_soon_page.dart';
 import '../../../journal/presentation/pages/journal_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../task/presentation/pages/task_page.dart';
 import 'beranda_page.dart';
 
 /// Shell utama setelah login: bottom navbar 4 tab sesuai keputusan produk
@@ -23,7 +23,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   // waktu pindah-pindah tab.
   static final _pages = [
     const BerandaPage(),
-    const ComingSoonPage(title: 'Tugas', icon: Icons.assignment_outlined),
+    const TaskPage(),
     const JournalPage(),
     const ProfilePage(),
   ];

@@ -169,6 +169,64 @@ class AppStrings {
       AppLanguage.en: 'Complete at least 1 activity correctly',
     },
     'pilih_foto': {AppLanguage.id: 'Pilih Foto', AppLanguage.en: 'Pick Photo'},
+    'kumpulkan_tugas': {
+      AppLanguage.id: 'Kumpulkan Tugas',
+      AppLanguage.en: 'Submit Task',
+    },
+    'lihat_file_terkumpul': {
+      AppLanguage.id: 'Lihat File Terkumpul',
+      AppLanguage.en: 'View Submitted File',
+    },
+    'catatan_kamu': {AppLanguage.id: 'Catatan kamu', AppLanguage.en: 'Your note'},
+    'catatan_admin': {
+      AppLanguage.id: 'Catatan Admin',
+      AppLanguage.en: 'Admin Note',
+    },
+    'file_gambar_tugas': {
+      AppLanguage.id: 'File / Gambar Tugas',
+      AppLanguage.en: 'File / Task Image',
+    },
+    'pilih_file': {AppLanguage.id: 'Pilih File', AppLanguage.en: 'Choose File'},
+    'tidak_ada_file_dipilih': {
+      AppLanguage.id: 'Tidak ada file yang dipilih',
+      AppLanguage.en: 'No file selected',
+    },
+    'catatan_opsional': {
+      AppLanguage.id: 'Catatan (opsional)',
+      AppLanguage.en: 'Note (optional)',
+    },
+    'catatan_placeholder': {
+      AppLanguage.id: 'Ada yang mau disampaikan ke admin?',
+      AppLanguage.en: 'Anything to tell the admin?',
+    },
+    'batal': {AppLanguage.id: 'Batal', AppLanguage.en: 'Cancel'},
+    'kirim': {AppLanguage.id: 'Kirim', AppLanguage.en: 'Send'},
+    'tugas_berhasil_dikumpulkan': {
+      AppLanguage.id: 'Tugas berhasil dikumpulkan',
+      AppLanguage.en: 'Task submitted successfully',
+    },
+    'pilih_file_dulu': {
+      AppLanguage.id: 'Pilih file dulu sebelum mengirim',
+      AppLanguage.en: 'Please choose a file before sending',
+    },
+    'tidak_bisa_buka_file': {
+      AppLanguage.id: 'Tidak bisa membuka file',
+      AppLanguage.en: 'Could not open file',
+    },
+    'belum_ada_tugas': {
+      AppLanguage.id: 'Belum ada tugas',
+      AppLanguage.en: 'No tasks yet',
+    },
+    'batas_waktu': {AppLanguage.id: 'Batas waktu', AppLanguage.en: 'Due date'},
+    'tidak_ada_batas_waktu': {
+      AppLanguage.id: 'Tidak ada batas waktu',
+      AppLanguage.en: 'No due date',
+    },
+    'ubah_status': {
+      AppLanguage.id: 'Ubah Status',
+      AppLanguage.en: 'Change Status',
+    },
+    'terlambat': {AppLanguage.id: 'Terlambat', AppLanguage.en: 'Overdue'},
   };
 
   static String t(String key, AppLanguage lang) {

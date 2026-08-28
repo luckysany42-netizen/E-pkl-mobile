@@ -39,6 +39,8 @@ dependencies:
   image_picker: ^1.1.2              # ambil foto dari kamera (buat face recognition & absen)
   cached_network_image: ^3.4.1      # tampilkan foto profil/journal dari server
   intl: ^0.19.0                     # format tanggal (absensi, jurnal)
+  file_picker: ^10.3.10        # pilih file (gambar/pdf/doc/xls/zip) buat kumpulkan tugas
+  url_launcher: ^6.3.1        # buka file terkumpul / attachment di browser luar
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
