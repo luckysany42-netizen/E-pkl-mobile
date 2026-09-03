@@ -9,6 +9,7 @@ import '../../../../core/language/server_value_translator.dart';
 import '../../data/models/journal_model.dart';
 import '../bloc/journal_bloc.dart';
 import 'create_journal_page.dart';
+import 'edit_journal_page.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
@@ -22,6 +23,17 @@ class _JournalPageState extends State<JournalPage> {
   void initState() {
     super.initState();
     context.read<JournalBloc>().add(const JournalLoadRequested());
+  }
+
+  void _openEdit(JournalModel journal) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<JournalBloc>(),
+          child: EditJournalPage(journal: journal),
+        ),
+      ),
+    );
   }
 
   @override
@@ -73,7 +85,10 @@ class _JournalPageState extends State<JournalPage> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
               itemCount: state.history.length,
               itemBuilder: (context, index) {
-                return _JournalCard(journal: state.history[index]);
+                return _JournalCard(
+                  journal: state.history[index],
+                  onEdit: () => _openEdit(state.history[index]),
+                );
               },
             ),
           );
@@ -85,8 +100,9 @@ class _JournalPageState extends State<JournalPage> {
 
 class _JournalCard extends StatelessWidget {
   final JournalModel journal;
+  final VoidCallback onEdit;
 
-  const _JournalCard({required this.journal});
+  const _JournalCard({required this.journal, required this.onEdit});
 
   Color _statusColor(String status) {
     switch (status) {
@@ -115,7 +131,7 @@ class _JournalCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: () => _showDetail(context, journal, lang),
+          onTap: () => _showDetail(context, journal, lang, onEdit),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -150,13 +166,34 @@ class _JournalCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    // Tombol Edit selalu tampil (mengganti pola "Detail" di
+                    // web) -- edit diizinkan di status APAPUN, termasuk
+                    // approved/rejected (backend otomatis balikin ke
+                    // pending kalau itu terjadi).
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      tooltip: context.tr('edit'),
+                      onPressed: onEdit,
+                      visualDensity: VisualDensity.compact,
+                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
                 Text(
                   '${journal.activities.length} ${context.tr('aktivitas')}',
                   style: const TextStyle(color: Colors.grey, fontSize: 13),
                 ),
+                if (journal.wasEdited) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '${context.tr('diedit_pada')} '
+                    '${DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(journal.lastEditedAt!)}',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -165,7 +202,12 @@ class _JournalCard extends StatelessWidget {
     );
   }
 
-  void _showDetail(BuildContext context, JournalModel journal, AppLanguage lang) {
+  void _showDetail(
+    BuildContext context,
+    JournalModel journal,
+    AppLanguage lang,
+    VoidCallback onEdit,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -184,12 +226,27 @@ class _JournalCard extends StatelessWidget {
               child: ListView(
                 controller: scrollController,
                 children: [
-                  Text(
-                    DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(journal.date),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(journal.date),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // tutup bottom sheet dulu
+                          onEdit();
+                        },
+                        icon: const Icon(Icons.edit_outlined, size: 16),
+                        label: Text(context.tr('edit')),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -199,6 +256,18 @@ class _JournalCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (journal.wasEdited) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '${context.tr('diedit_pada')} '
+                      '${DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(journal.lastEditedAt!)}',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
                   if (journal.status == 'rejected' &&
                       journal.catatanApproval != null) ...[
                     const SizedBox(height: 12),

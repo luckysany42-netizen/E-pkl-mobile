@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,17 +9,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/language/app_strings.dart';
 import '../../data/models/journal_activity_model.dart';
 import '../bloc/journal_bloc.dart';
-
-/// Form field lokal (belum tentu valid), dibedain dari JournalActivityModel
-/// yang dikirim ke API supaya gampang nge-track TextEditingController per
-/// baris tanpa bikin ulang widget tiap kali user ngetik.
-class _ActivityFormRow {
-  final TextEditingController kegiatanController = TextEditingController();
-  TimeOfDay? jamMulai;
-  TimeOfDay? jamSelesai;
-
-  void dispose() => kegiatanController.dispose();
-}
+import '../widgets/journal_form_widgets.dart';
 
 class CreateJournalPage extends StatefulWidget {
   const CreateJournalPage({super.key});
@@ -29,42 +20,84 @@ class CreateJournalPage extends StatefulWidget {
 
 class _CreateJournalPageState extends State<CreateJournalPage> {
   DateTime _date = DateTime.now();
-  final List<_ActivityFormRow> _activities = [_ActivityFormRow()];
+  final List<ActivityFormRow> _activities = [ActivityFormRow()];
   File? _foto;
   final _picker = ImagePicker();
+
+  // Loading tombol dikontrol LOKAL.
+  // Safety timer menjamin tombol tidak menggantung selamanya
+  // jika terjadi masalah jaringan yang tidak terduga.
+  bool _isSubmitting = false;
+  Timer? _safetyTimer;
+
+  // Mencegah hasil submit yang sama diproses lebih dari satu kali.
+  //
+  // Ini adalah safety guard tambahan supaya Navigator.pop()
+  // tidak pernah dipanggil dua kali untuk satu proses submit.
+  bool _hasHandledSubmitResult = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Ambil daftar tanggal yang sudah punya jurnal, buat di-disable
+    // di date picker.
+    context.read<JournalBloc>().add(
+          const JournalDatesTakenLoadRequested(),
+        );
+  }
 
   @override
   void dispose() {
     for (final a in _activities) {
       a.dispose();
     }
+
+    _safetyTimer?.cancel();
+
     super.dispose();
   }
 
-  String _fmtTime(TimeOfDay? t) {
-    if (t == null) return '--:--';
-    return '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
-  }
+  bool _isSameDate(DateTime a, DateTime b) =>
+      a.year == b.year &&
+      a.month == b.month &&
+      a.day == b.day;
 
-  Future<void> _pickDate() async {
+  Future<void> _pickDate(List<DateTime> datesTaken) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _date,
-      firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      // Jurnal untuk hari yang belum terjadi tidak masuk akal, backend juga
-      // tidak melarang, tapi dibatasi di app biar user tidak salah isi.
+      firstDate: DateTime.now().subtract(
+        const Duration(days: 30),
+      ),
+      // Jurnal untuk hari yang belum terjadi tidak masuk akal,
+      // backend juga tidak melarang, tapi dibatasi di app.
       lastDate: DateTime.now(),
+      // Tanggal yang SUDAH punya jurnal tidak bisa dipilih lagi.
+      selectableDayPredicate: (day) =>
+          !datesTaken.any(
+            (taken) => _isSameDate(taken, day),
+          ),
     );
-    if (picked != null) setState(() => _date = picked);
+
+    if (picked != null) {
+      setState(() => _date = picked);
+    }
   }
 
-  Future<void> _pickTime(_ActivityFormRow row, bool isStart) async {
+  Future<void> _pickTime(
+    ActivityFormRow row,
+    bool isStart,
+  ) async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: (isStart ? row.jamMulai : row.jamSelesai) ??
-          TimeOfDay.now(),
+      initialTime:
+          (isStart ? row.jamMulai : row.jamSelesai) ??
+              TimeOfDay.now(),
     );
+
     if (picked == null) return;
+
     setState(() {
       if (isStart) {
         row.jamMulai = picked;
@@ -79,7 +112,10 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
       source: ImageSource.gallery,
       imageQuality: 80,
     );
-    if (photo != null) setState(() => _foto = File(photo.path));
+
+    if (photo != null) {
+      setState(() => _foto = File(photo.path));
+    }
   }
 
   bool get _isValid {
@@ -89,30 +125,74 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
           a.kegiatanController.text.trim().isEmpty) {
         return false;
       }
-      final startMinutes = a.jamMulai!.hour * 60 + a.jamMulai!.minute;
-      final endMinutes = a.jamSelesai!.hour * 60 + a.jamSelesai!.minute;
-      if (endMinutes <= startMinutes) return false;
+
+      final startMinutes =
+          a.jamMulai!.hour * 60 + a.jamMulai!.minute;
+
+      final endMinutes =
+          a.jamSelesai!.hour * 60 + a.jamSelesai!.minute;
+
+      if (endMinutes <= startMinutes) {
+        return false;
+      }
     }
+
     return _activities.isNotEmpty;
   }
 
   void _submit() {
     if (!_isValid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr('lengkapi_minimal_1_aktivitas'))),
+        SnackBar(
+          content: Text(
+            context.trRead(
+              'lengkapi_minimal_1_aktivitas',
+            ),
+          ),
+        ),
       );
       return;
     }
 
+    debugPrint(
+      '[CreateJournalPage] _submit() dipanggil, '
+      'activities=${_activities.length}',
+    );
+
+    // Reset guard untuk proses submit baru.
+    _hasHandledSubmitResult = false;
+
+    setState(() => _isSubmitting = true);
+
+    _safetyTimer?.cancel();
+
+    _safetyTimer = Timer(
+      const Duration(seconds: 65),
+      () {
+        debugPrint(
+          '[CreateJournalPage] SAFETY TIMER KEPICU (65 detik)',
+        );
+
+        if (mounted && _isSubmitting) {
+          setState(() => _isSubmitting = false);
+        }
+      },
+    );
+
     final activityModels = _activities
         .map(
           (a) => JournalActivityModel(
-            jamMulai: _fmtTime(a.jamMulai),
-            jamSelesai: _fmtTime(a.jamSelesai),
-            kegiatan: a.kegiatanController.text.trim(),
+            jamMulai: formatTimeOfDay(a.jamMulai),
+            jamSelesai: formatTimeOfDay(a.jamSelesai),
+            kegiatan:
+                a.kegiatanController.text.trim(),
           ),
         )
         .toList();
+
+    debugPrint(
+      '[CreateJournalPage] dispatch JournalCreateRequested...',
+    );
 
     context.read<JournalBloc>().add(
           JournalCreateRequested(
@@ -121,115 +201,267 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
             foto: _foto,
           ),
         );
+
+    debugPrint(
+      '[CreateJournalPage] event sudah di-dispatch',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('tambah_jurnal'))),
+      appBar: AppBar(
+        title: Text(
+          context.tr('tambah_jurnal'),
+        ),
+      ),
       body: BlocConsumer<JournalBloc, JournalState>(
+        // Hanya proses submitSuccess ketika terjadi transisi:
+        //
+        // false -> true
+        //
+        // Bukan:
+        //
+        // true -> true
+        //
+        // Ini mencegah listener terpanggil lagi ketika Bloc
+        // melakukan refresh history setelah submit berhasil.
         listenWhen: (prev, curr) =>
-            curr.submitSuccess || curr.errorMessage != prev.errorMessage,
+            (!prev.submitSuccess &&
+                curr.submitSuccess) ||
+            curr.errorMessage != prev.errorMessage,
+
         listener: (context, state) {
+          debugPrint(
+            '[CreateJournalPage] LISTENER KEPANGGIL, '
+            'submitSuccess=${state.submitSuccess}, '
+            'error=${state.errorMessage}',
+          );
+
+          // Safety guard:
+          // hasil submit yang sama tidak boleh diproses dua kali.
+          if (_hasHandledSubmitResult) {
+            debugPrint(
+              '[CreateJournalPage] Result sudah ditangani, '
+              'listener diabaikan.',
+            );
+            return;
+          }
+
           if (state.submitSuccess) {
+            // Tandai SEBELUM Navigator.pop().
+            //
+            // Penting: jangan menaruh ini setelah pop karena
+            // perubahan navigation dapat menyebabkan lifecycle
+            // berjalan sebelum kode berikutnya selesai.
+            _hasHandledSubmitResult = true;
+
+            _safetyTimer?.cancel();
+
+            if (!mounted) return;
+
+            setState(() => _isSubmitting = false);
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(context.tr('jurnal_berhasil_disimpan')),
+                content: Text(
+                  context.trRead(
+                    'jurnal_berhasil_disimpan',
+                  ),
+                ),
                 backgroundColor: Colors.green,
               ),
             );
+
+            debugPrint(
+              '[CreateJournalPage] memanggil Navigator.pop()...',
+            );
+
+            // HANYA BOLEH TERJADI SEKALI.
             Navigator.of(context).pop();
+
+            debugPrint(
+              '[CreateJournalPage] Navigator.pop() selesai dipanggil',
+            );
           } else if (state.errorMessage != null) {
+            _hasHandledSubmitResult = true;
+
+            _safetyTimer?.cancel();
+
+            if (!mounted) return;
+
+            setState(() => _isSubmitting = false);
+
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
+              SnackBar(
+                content: Text(
+                  state.errorMessage!,
+                ),
+              ),
             );
           }
         },
+
         builder: (context, state) {
           return Stack(
             children: [
               ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                padding: const EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  100,
+                ),
                 children: [
                   Text(
                     context.tr('tanggal'),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+
                   const SizedBox(height: 8),
+
                   InkWell(
-                    onTap: _pickDate,
+                    onTap: () => _pickDate(
+                      state.datesTaken,
+                    ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
                         vertical: 14,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                        ),
+                        borderRadius:
+                            BorderRadius.circular(10),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(DateFormat('dd MMMM yyyy', 'id_ID').format(_date)),
-                          const Icon(Icons.calendar_today, size: 18),
+                          Text(
+                            DateFormat(
+                              'dd MMMM yyyy',
+                              'id_ID',
+                            ).format(_date),
+                          ),
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 18,
+                          ),
                         ],
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 20),
+
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         context.tr('aktivitas'),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
+
                       TextButton.icon(
-                        onPressed: () =>
-                            setState(() => _activities.add(_ActivityFormRow())),
-                        icon: const Icon(Icons.add, size: 18),
-                        label: Text(context.tr('tambah_aktivitas')),
+                        onPressed: () {
+                          setState(
+                            () => _activities.add(
+                              ActivityFormRow(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.add,
+                          size: 18,
+                        ),
+                        label: Text(
+                          context.tr(
+                            'tambah_aktivitas',
+                          ),
+                        ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 8),
-                  ..._activities.asMap().entries.map((entry) {
+
+                  ..._activities
+                      .asMap()
+                      .entries
+                      .map((entry) {
                     final index = entry.key;
                     final row = entry.value;
-                    return _ActivityFormCard(
+
+                    return ActivityFormCard(
                       row: row,
                       index: index,
-                      canDelete: _activities.length > 1,
+                      canDelete:
+                          _activities.length > 1,
                       onDelete: () {
                         setState(() {
                           row.dispose();
                           _activities.removeAt(index);
                         });
                       },
-                      onPickTime: (isStart) => _pickTime(row, isStart),
-                      fmtTime: _fmtTime,
+                      onPickTime: (isStart) =>
+                          _pickTime(row, isStart),
+                      fmtTime: formatTimeOfDay,
                     );
                   }),
+
                   const SizedBox(height: 12),
+
                   Text(
-                    context.tr('foto_bukti_opsional'),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    context.tr(
+                      'foto_bukti_opsional',
+                    ),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+
                   const SizedBox(height: 8),
+
                   if (_foto != null)
                     Stack(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.file(_foto!, height: 140, width: double.infinity, fit: BoxFit.cover),
+                          borderRadius:
+                              BorderRadius.circular(10),
+                          child: Image.file(
+                            _foto!,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
                         ),
+
                         Positioned(
                           top: 4,
                           right: 4,
                           child: IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            style: IconButton.styleFrom(backgroundColor: Colors.black45),
-                            onPressed: () => setState(() => _foto = null),
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
+                            style:
+                                IconButton.styleFrom(
+                              backgroundColor:
+                                  Colors.black45,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () => _foto = null,
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -237,11 +469,18 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                   else
                     OutlinedButton.icon(
                       onPressed: _pickPhoto,
-                      icon: const Icon(Icons.image_outlined),
-                      label: Text(context.tr('pilih_foto')),
+                      icon: const Icon(
+                        Icons.image_outlined,
+                      ),
+                      label: Text(
+                        context.tr(
+                          'pilih_foto',
+                        ),
+                      ),
                     ),
                 ],
               ),
+
               Positioned(
                 left: 16,
                 right: 16,
@@ -249,131 +488,28 @@ class _CreateJournalPageState extends State<CreateJournalPage> {
                 child: SizedBox(
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: state.isSubmitting ? null : _submit,
-                    child: state.isSubmitting
+                    onPressed:
+                        _isSubmitting ? null : _submit,
+                    child: _isSubmitting
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child:
+                                CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
                           )
-                        : Text(context.tr('simpan_jurnal')),
+                        : Text(
+                            context.tr(
+                              'simpan_jurnal',
+                            ),
+                          ),
                   ),
                 ),
               ),
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _ActivityFormCard extends StatelessWidget {
-  final _ActivityFormRow row;
-  final int index;
-  final bool canDelete;
-  final VoidCallback onDelete;
-  final void Function(bool isStart) onPickTime;
-  final String Function(TimeOfDay?) fmtTime;
-
-  const _ActivityFormCard({
-    required this.row,
-    required this.index,
-    required this.canDelete,
-    required this.onDelete,
-    required this.onPickTime,
-    required this.fmtTime,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${context.tr('aktivitas')} ${index + 1}',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              if (canDelete)
-                InkWell(
-                  onTap: onDelete,
-                  child: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _TimeField(
-                  label: context.tr('jam_mulai'),
-                  value: fmtTime(row.jamMulai),
-                  onTap: () => onPickTime(true),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _TimeField(
-                  label: context.tr('jam_selesai'),
-                  value: fmtTime(row.jamSelesai),
-                  onTap: () => onPickTime(false),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: row.kegiatanController,
-            maxLines: 2,
-            decoration: InputDecoration(
-              labelText: context.tr('kegiatan'),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimeField extends StatelessWidget {
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-
-  const _TimeField({required this.label, required this.value, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-          ],
-        ),
       ),
     );
   }

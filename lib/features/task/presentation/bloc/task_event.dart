@@ -23,15 +23,15 @@ class TaskStatusUpdateRequested extends TaskEvent {
 
 class TaskSubmitRequested extends TaskEvent {
   final int taskId;
-  final File attachment;
+  final List<File> attachments;
   final String? note;
 
   const TaskSubmitRequested({
     required this.taskId,
-    required this.attachment,
+    required this.attachments,
     this.note,
   });
 
   @override
-  List<Object?> get props => [taskId, attachment, note];
+  List<Object?> get props => [taskId, attachments, note];
 }

@@ -8,6 +8,8 @@ class JournalModel {
   final String status; // pending | approved | rejected
   final String? catatanApproval; // alasan ditolak, cuma ada kalau status=rejected
   final List<JournalActivityModel> activities;
+  final DateTime? lastEditedAt;
+  final int editCount;
 
   JournalModel({
     required this.id,
@@ -16,9 +18,13 @@ class JournalModel {
     required this.status,
     this.catatanApproval,
     this.activities = const [],
+    this.lastEditedAt,
+    this.editCount = 0,
   });
 
   String? get fotoUrl => ApiEndpoints.assetUrl(foto);
+
+  bool get wasEdited => editCount > 0 && lastEditedAt != null;
 
   factory JournalModel.fromJson(Map<String, dynamic> json) {
     return JournalModel(
@@ -34,6 +40,12 @@ class JournalModel {
       activities: (json['activities'] as List? ?? [])
           .map((e) => JournalActivityModel.fromJson(e))
           .toList(),
+      lastEditedAt: json['last_edited_at'] == null
+          ? null
+          : DateTime.tryParse(json['last_edited_at'].toString())?.toLocal(),
+      editCount: json['edit_count'] is int
+          ? json['edit_count']
+          : int.tryParse(json['edit_count']?.toString() ?? '0') ?? 0,
     );
   }
 }

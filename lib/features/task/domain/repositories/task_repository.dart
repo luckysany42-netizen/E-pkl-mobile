@@ -16,12 +16,14 @@ abstract class TaskRepository {
     required String status,
   });
 
-  /// POST /tasks/{id}/submit (multipart) -> kumpulkan tugas dengan file +
-  /// catatan opsional. Backend nolak (422) kalau task sudah berstatus
-  /// 'selesai'. Berhasil submit -> status otomatis jadi 'submitted'.
+  /// POST /tasks/{id}/submit (multipart) -> kumpulkan tugas dengan BANYAK
+  /// file sekaligus (min 1) + catatan opsional. Backend nolak (422) kalau
+  /// task sudah berstatus 'selesai'. Berhasil submit -> status jadi
+  /// 'submitted', dan lampiran LAMA (kalau ada, dari submission sebelumnya
+  /// yang direvisi/ditolak) otomatis dihapus & diganti yang baru.
   Future<Result<TaskModel>> submitTask({
     required int taskId,
-    required File attachment,
+    required List<File> attachments,
     String? note,
   });
 }

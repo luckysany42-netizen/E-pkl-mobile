@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/task_model.dart';
@@ -65,6 +66,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     TaskSubmitRequested event,
     Emitter<TaskState> emit,
   ) async {
+    debugPrint('[TaskBloc] _onSubmitRequested START taskId=${event.taskId}');
     emit(
       state.copyWith(
         processingTaskId: event.taskId,
@@ -75,14 +77,17 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
     final result = await _repository.submitTask(
       taskId: event.taskId,
-      attachment: event.attachment,
+      attachments: event.attachments,
       note: event.note,
     );
+
+    debugPrint('[TaskBloc] repository returned, isSuccess=${result.isSuccess}, error=${result.errorMessage}');
 
     if (result.isSuccess) {
       final updatedTasks = state.tasks
           .map((t) => t.id == event.taskId ? result.data! : t)
           .toList();
+      debugPrint('[TaskBloc] emitting submitSuccess=true');
       emit(
         state.copyWith(
           tasks: updatedTasks,
@@ -90,7 +95,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           submitSuccess: true,
         ),
       );
+      debugPrint('[TaskBloc] emit done, current state.submitSuccess=${state.submitSuccess}');
     } else {
+      debugPrint('[TaskBloc] emitting error');
       emit(
         state.copyWith(
           clearProcessingTaskId: true,

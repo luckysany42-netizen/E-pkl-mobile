@@ -205,6 +205,25 @@ class AppStrings {
       AppLanguage.id: 'Tugas berhasil dikumpulkan',
       AppLanguage.en: 'Task submitted successfully',
     },
+    'edit_jurnal': {AppLanguage.id: 'Edit Jurnal', AppLanguage.en: 'Edit Journal'},
+    'jurnal_diperbarui_pending': {
+      AppLanguage.id: 'Jurnal diperbarui. Menunggu approval lagi.',
+      AppLanguage.en: 'Journal updated. Pending approval again.',
+    },
+    'peringatan_edit_reset_status': {
+      AppLanguage.id:
+          'Jurnal ini sudah diputuskan sebelumnya. Kalau diedit, statusnya akan kembali Menunggu Approval.',
+      AppLanguage.en:
+          'This journal was already decided. Editing it will reset the status back to Pending.',
+    },
+    'foto_lama': {AppLanguage.id: 'Foto lama', AppLanguage.en: 'Current photo'},
+    'ganti_foto': {AppLanguage.id: 'Ganti Foto', AppLanguage.en: 'Change Photo'},
+    'simpan_perubahan': {
+      AppLanguage.id: 'Simpan Perubahan',
+      AppLanguage.en: 'Save Changes',
+    },
+    'diedit_pada': {AppLanguage.id: 'Diedit pada', AppLanguage.en: 'Edited on'},
+    'edit': {AppLanguage.id: 'Edit', AppLanguage.en: 'Edit'},
     'pilih_file_dulu': {
       AppLanguage.id: 'Pilih file dulu sebelum mengirim',
       AppLanguage.en: 'Please choose a file before sending',
@@ -237,8 +256,30 @@ class AppStrings {
 /// Shortcut biar dipakainya gampang: context.tr('beranda')
 /// alih-alih AppStrings.t('beranda', context.watch<LanguageCubit>().state)
 extension AppStringsContext on BuildContext {
+  /// HANYA boleh dipanggil di dalam method build() (atau builder callback
+  /// widget lain yang dieksekusi SAAT proses build, seperti
+  /// showDialog/showModalBottomSheet's `builder:`). Pakai watch() supaya
+  /// teksnya otomatis update kalau bahasa diganti.
+  ///
+  /// JANGAN dipakai di dalam:
+  /// - listener: milik BlocListener/BlocConsumer
+  /// - callback imperatif seperti onPressed/onTap, _submit(), dst
+  /// karena provider's watch() akan CRASH ("Tried to listen to a value
+  /// exposed with provider, from outside of the widget tree") kalau
+  /// dipanggil di luar proses build -- pakai trRead() untuk kasus itu.
   String tr(String key) {
     final lang = watch<LanguageCubit>().state;
+    return AppStrings.t(key, lang);
+  }
+
+  /// Versi AMAN dipakai di dalam listener/callback/event handler (di luar
+  /// build()) -- misal isi SnackBar di dalam BlocListener.listener, atau
+  /// pesan validasi di dalam fungsi _submit(). Pakai read() (bukan watch())
+  /// jadi tidak subscribe ke perubahan -- itu memang benar untuk kasus ini
+  /// karena teksnya cuma dibaca SEKALI saat event terjadi, tidak perlu
+  /// auto-update.
+  String trRead(String key) {
+    final lang = read<LanguageCubit>().state;
     return AppStrings.t(key, lang);
   }
 }

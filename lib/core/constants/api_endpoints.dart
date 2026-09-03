@@ -69,12 +69,21 @@ class ApiEndpoints {
   static const String tasks = '/tasks';
   static String taskStatus(String taskId) => '/tasks/$taskId/status';
   static String taskSubmit(String taskId) => '/tasks/$taskId/submit';
+  // TODO: endpoint ini butuh Authorization header (JWT), jadi TIDAK BISA
+  // dibuka langsung lewat url_launcher (browser luar tidak bawa token kita).
+  // Untuk dipakai nanti, harus di-download dulu via Dio (dengan header
+  // Authorization otomatis dari ApiClient) ke folder temp, baru dibuka
+  // pakai package seperti open_file. Belum diimplementasikan di UI.
+  static String taskAttachmentsZip(String taskId) =>
+      '$baseUrl/tasks/$taskId/attachments/zip';
 
   // ---------------------------------------------------------------------
   // JOURNAL
   // ---------------------------------------------------------------------
   static const String journals = '/journals';
   static const String journalHistory = '/journals/history';
+  static const String journalDatesTaken = '/journals/dates-taken';
+  static String journalUpdate(String id) => '/journals/$id';
   static String journalApprove(String id) => '/journals/$id/approve';
   static String journalReject(String id) => '/journals/$id/reject';
 

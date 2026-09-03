@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/language/app_language.dart';
 import '../../../../core/language/app_strings.dart';
@@ -9,6 +8,7 @@ import '../../../../core/language/language_cubit.dart';
 import '../../../../core/language/server_value_translator.dart';
 import '../../data/models/task_model.dart';
 import '../bloc/task_bloc.dart';
+import '../widgets/attachment_gallery.dart';
 import '../widgets/submit_task_sheet.dart';
 
 class TaskPage extends StatefulWidget {
@@ -139,18 +139,6 @@ class _TaskCard extends StatelessWidget {
     final due = task.dueDate!;
     return DateTime(due.year, due.month, due.day)
         .isBefore(DateTime(today.year, today.month, today.day));
-  }
-
-  Future<void> _openAttachment(BuildContext context) async {
-    final url = task.attachmentUrl;
-    if (url == null) return;
-    final uri = Uri.parse(url);
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr('tidak_bisa_buka_file'))),
-      );
-    }
   }
 
   @override
@@ -293,17 +281,17 @@ class _TaskCard extends StatelessWidget {
                 ),
               ),
 
-            // Tombol lihat file cuma muncul kalau sudah pernah ada attachment.
-            if (task.attachmentUrl != null) ...[
+            // Galeri lampiran cuma muncul kalau sudah pernah ada yang
+            // dikumpulkan. Tap salah satu foto -> preview IN-APP (bukan
+            // buka tab browser luar seperti sebelumnya).
+            if (task.hasAttachments) ...[
               if (task.canToggleStatus) const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => _openAttachment(context),
-                  icon: const Icon(Icons.attach_file, size: 16),
-                  label: Text(context.tr('lihat_file_terkumpul')),
-                ),
+              Text(
+                context.tr('lihat_file_terkumpul'),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
+              const SizedBox(height: 6),
+              TaskAttachmentGallery(attachments: task.attachments),
             ],
 
             // Kumpulkan/Submit ulang -- boleh dipakai di semua status

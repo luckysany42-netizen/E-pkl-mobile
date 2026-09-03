@@ -36,7 +36,16 @@ class TaskState extends Equatable {
           : (processingTaskId ?? this.processingTaskId),
       tasks: tasks ?? this.tasks,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      submitSuccess: submitSuccess ?? false,
+      // PENTING: default-nya PERTAHANKAN nilai sebelumnya (bukan selalu
+      // reset ke false). Sebelumnya, SETIAP copyWith() -- termasuk dari
+      // _onLoadRequested/_onStatusUpdateRequested yang tidak ada
+      // hubungannya dengan submit -- diam-diam ikut me-reset submitSuccess
+      // ke false. Kalau reset ini kebetulan "menyusul" tepat setelah submit
+      // sukses (misal race dengan event lain), listener widget bisa gagal
+      // sempat bereaksi. Sekarang submitSuccess CUMA berubah kalau memang
+      // sengaja di-set (baik ke true saat sukses, maupun eksplisit ke false
+      // di awal aksi baru) -- lihat _onSubmitRequested di task_bloc.dart.
+      submitSuccess: submitSuccess ?? this.submitSuccess,
     );
   }
 

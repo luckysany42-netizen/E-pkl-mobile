@@ -4,16 +4,19 @@ class JournalState extends Equatable {
   final bool isLoading;
   final bool isSubmitting;
   final List<JournalModel> history;
+  final List<DateTime> datesTaken;
   final String? errorMessage;
-  // true sesaat setelah submit sukses, dipakai buat trigger tutup form &
-  // snackbar di halaman, lalu di-reset lagi biar tidak ke-trigger berulang
-  // waktu widget rebuild karena alasan lain.
+
+  // True sesaat setelah submit sukses.
+  // Digunakan oleh halaman form untuk menutup halaman setelah
+  // create/update berhasil.
   final bool submitSuccess;
 
   const JournalState({
     this.isLoading = false,
     this.isSubmitting = false,
     this.history = const [],
+    this.datesTaken = const [],
     this.errorMessage,
     this.submitSuccess = false,
   });
@@ -22,6 +25,7 @@ class JournalState extends Equatable {
     bool? isLoading,
     bool? isSubmitting,
     List<JournalModel>? history,
+    List<DateTime>? datesTaken,
     String? errorMessage,
     bool clearError = false,
     bool? submitSuccess,
@@ -30,12 +34,25 @@ class JournalState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       history: history ?? this.history,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      submitSuccess: submitSuccess ?? false,
+      datesTaken: datesTaken ?? this.datesTaken,
+      errorMessage: clearError
+          ? null
+          : (errorMessage ?? this.errorMessage),
+
+      // Nilai lama tetap dipertahankan secara default.
+      // Caller yang membutuhkan reset harus mengirim
+      // submitSuccess: false secara eksplisit.
+      submitSuccess: submitSuccess ?? this.submitSuccess,
     );
   }
 
   @override
-  List<Object?> get props =>
-      [isLoading, isSubmitting, history, errorMessage, submitSuccess];
+  List<Object?> get props => [
+        isLoading,
+        isSubmitting,
+        history,
+        datesTaken,
+        errorMessage,
+        submitSuccess,
+      ];
 }
