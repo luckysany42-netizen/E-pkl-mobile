@@ -13,6 +13,7 @@ import '../../../../core/language/server_value_translator.dart';
 import '../../../attendance/data/models/attendance_model.dart';
 import '../../../attendance/presentation/bloc/attendance_bloc.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../leave/presentation/pages/leave_page.dart';
 import '../widgets/internship_progress_card.dart';
 
 enum _HistoryRange { week, month }
@@ -159,14 +160,21 @@ class _BerandaPageState extends State<BerandaPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // Fitur izin/sakit: endpoint backend belum ada, jadi
-                  // tombol ini nonaktif dulu (coming soon) sesuai keputusan
-                  // produk. Begitu endpoint /attendances/leave (atau serupa)
-                  // dibuat di Laravel, tinggal aktifkan onTap di sini.
-                  _ComingSoonBanner(
-                    icon: Icons.block,
+                  _AttendanceActionCard(
+                    color: const Color(0xFFEF4444),
+                    icon: Icons.event_busy_outlined,
                     title: context.tr('absensi_izin_sakit'),
                     subtitle: context.tr('ketidakhadiran_perizinan'),
+                    enabled: true,
+                    isLoading: false,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LeavePage(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -314,69 +322,6 @@ class _AttendanceActionCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ComingSoonBanner extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _ComingSoonBanner({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Opacity(
-      opacity: 0.6,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFEF5350),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 26),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                context.tr('segera_hadir'),
-                style: const TextStyle(color: Colors.white, fontSize: 11),
-              ),
-            ),
-          ],
         ),
       ),
     );

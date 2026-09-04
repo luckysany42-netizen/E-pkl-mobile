@@ -90,6 +90,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       name: event.name,
       email: event.email,
       phone: event.phone,
+      nimNis: event.nimNis,
+      asalInstansi: event.asalInstansi,
       password: event.password,
       passwordConfirmation: event.passwordConfirmation,
     );

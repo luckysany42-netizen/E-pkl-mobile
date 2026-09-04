@@ -36,6 +36,8 @@ class AuthRegisterRequested extends AuthEvent {
   final String name;
   final String email;
   final String? phone;
+  final String nimNis;
+  final String asalInstansi;
   final String password;
   final String passwordConfirmation;
 
@@ -43,10 +45,20 @@ class AuthRegisterRequested extends AuthEvent {
     required this.name,
     required this.email,
     this.phone,
+    required this.nimNis,
+    required this.asalInstansi,
     required this.password,
     required this.passwordConfirmation,
   });
 
   @override
-  List<Object?> get props => [name, email, phone, password, passwordConfirmation];
+  List<Object?> get props => [
+        name,
+        email,
+        phone,
+        nimNis,
+        asalInstansi,
+        password,
+        passwordConfirmation,
+      ];
 }

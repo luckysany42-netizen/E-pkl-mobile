@@ -58,6 +58,8 @@ class AuthRepositoryImpl implements AuthRepository {
     required String name,
     required String email,
     String? phone,
+    required String nimNis,
+    required String asalInstansi,
     required String password,
     required String passwordConfirmation,
   }) async {
@@ -68,6 +70,8 @@ class AuthRepositoryImpl implements AuthRepository {
           'name': name,
           'email': email,
           'phone': phone,
+          'nim_nis': nimNis,
+          'asal_instansi': asalInstansi,
           'password': password,
           'password_confirmation': passwordConfirmation,
         },

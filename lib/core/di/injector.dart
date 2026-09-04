@@ -14,6 +14,12 @@ import '../../features/journal/presentation/bloc/journal_bloc.dart';
 import '../../features/task/data/repositories/task_repository_impl.dart';
 import '../../features/task/domain/repositories/task_repository.dart';
 import '../../features/task/presentation/bloc/task_bloc.dart';
+import '../../features/profile/data/repositories/profile_repository_impl.dart';
+import '../../features/profile/domain/repositories/profile_repository.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
+import '../../features/leave/data/repositories/leave_repository_impl.dart';
+import '../../features/leave/domain/repositories/leave_repository.dart';
+import '../../features/leave/presentation/bloc/leave_bloc.dart';
 
 final GetIt sl = GetIt.instance; // "sl" = service locator
 
@@ -50,6 +56,17 @@ Future<void> initDependencies() async {
     () => TaskRepositoryImpl(sl<ApiClient>()),
   );
   sl.registerFactory<TaskBloc>(() => TaskBloc(sl<TaskRepository>()));
+
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(sl<ApiClient>()),
+  );
+  sl.registerFactory<ProfileBloc>(
+    () => ProfileBloc(sl<ProfileRepository>()),
+  );
+  sl.registerLazySingleton<LeaveRepository>(
+    () => LeaveRepositoryImpl(sl<ApiClient>()),
+  );
+  sl.registerFactory<LeaveBloc>(() => LeaveBloc(sl<LeaveRepository>()));
 
   // TODO: daftarkan repository & bloc fitur lain di sini kalau sudah dibuat
   // (profile, face_recognition)

@@ -63,6 +63,11 @@ class ApiEndpoints {
   static const String changePassword = '/profile/change-password';
 
   // ---------------------------------------------------------------------
+  // LEAVE REQUESTS
+  // ---------------------------------------------------------------------
+  static const String leaveRequests = '/leave-requests';
+
+  // ---------------------------------------------------------------------
   // TASK / INTERN
   // ---------------------------------------------------------------------
   static const String internTasks = '/intern/tasks';

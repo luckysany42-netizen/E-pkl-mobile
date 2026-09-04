@@ -10,6 +10,10 @@ class UserModel {
   final String? photo;
   final String? nimNis;
   final String? asalInstansi;
+  final String? asalInstansiAddress;
+  final double? asalInstansiLatitude;
+  final double? asalInstansiLongitude;
+  final String? asalInstansiPlaceId;
   final String? posisi;
   final DateTime? tanggalMulai;
   final DateTime? tanggalSelesai;
@@ -26,6 +30,10 @@ class UserModel {
     this.photo,
     this.nimNis,
     this.asalInstansi,
+    this.asalInstansiAddress,
+    this.asalInstansiLatitude,
+    this.asalInstansiLongitude,
+    this.asalInstansiPlaceId,
     this.posisi,
     this.tanggalMulai,
     this.tanggalSelesai,
@@ -77,6 +85,12 @@ class UserModel {
       return DateTime.tryParse(raw.toString())?.toLocal();
     }
 
+    double? parseDouble(dynamic raw) {
+      if (raw == null) return null;
+      if (raw is num) return raw.toDouble();
+      return double.tryParse(raw.toString());
+    }
+
     return UserModel(
       id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
       name: json['name'] ?? '',
@@ -85,6 +99,10 @@ class UserModel {
       photo: json['photo'],
       nimNis: json['nim_nis'],
       asalInstansi: json['asal_instansi'],
+      asalInstansiAddress: json['asal_instansi_address'],
+      asalInstansiLatitude: parseDouble(json['asal_instansi_latitude']),
+      asalInstansiLongitude: parseDouble(json['asal_instansi_longitude']),
+      asalInstansiPlaceId: json['asal_instansi_place_id'],
       posisi: json['posisi'],
       tanggalMulai: parseDate(json['tanggal_mulai']),
       tanggalSelesai: parseDate(json['tanggal_selesai']),

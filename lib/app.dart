@@ -9,6 +9,8 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/attendance/presentation/bloc/attendance_bloc.dart';
 import 'features/journal/presentation/bloc/journal_bloc.dart';
+import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'features/leave/presentation/bloc/leave_bloc.dart';
 import 'features/task/presentation/bloc/task_bloc.dart';
 import 'features/home/presentation/pages/main_navigation_page.dart';
 
@@ -25,6 +27,8 @@ class EpklApp extends StatelessWidget {
         ),
         BlocProvider<AttendanceBloc>(create: (_) => sl<AttendanceBloc>()),
         BlocProvider<JournalBloc>(create: (_) => sl<JournalBloc>()),
+        BlocProvider<ProfileBloc>(create: (_) => sl<ProfileBloc>()),
+        BlocProvider<LeaveBloc>(create: (_) => sl<LeaveBloc>()),
         BlocProvider<TaskBloc>(create: (_) => sl<TaskBloc>()),
         // TODO: tambahkan BlocProvider untuk FaceRecognitionBloc di sini
       ],

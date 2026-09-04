@@ -26,6 +26,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _nimNisController = TextEditingController();
+  final _asalInstansiController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordConfirmController = TextEditingController();
@@ -34,6 +36,8 @@ class _RegisterPageState extends State<RegisterPage> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _nimNisController.dispose();
+    _asalInstansiController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
     _passwordConfirmController.dispose();
@@ -127,6 +131,30 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           const SizedBox(height: 16),
                           AuthTextField(
+                            controller: _nimNisController,
+                            label: 'NIS',
+                            icon: Icons.badge_outlined,
+                            keyboardType: TextInputType.number,
+                            validator: (v) {
+                              final value = v?.trim() ?? '';
+                              if (value.isEmpty) return 'NIS wajib diisi';
+                              if (value.length < 5 || value.length > 18) {
+                                return 'NIS harus terdiri dari 5-18 angka';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          AuthTextField(
+                            controller: _asalInstansiController,
+                            label: 'Asal Sekolah',
+                            icon: Icons.school_outlined,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Asal sekolah wajib diisi'
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+                          AuthTextField(
                             controller: _phoneController,
                             label: 'No. HP (opsional)',
                             icon: Icons.phone_outlined,
@@ -165,6 +193,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                       phone: _phoneController.text.trim().isEmpty
                                           ? null
                                           : _phoneController.text.trim(),
+                                        nimNis: _nimNisController.text.trim(),
+                                        asalInstansi:
+                                          _asalInstansiController.text.trim(),
                                       password: _passwordController.text,
                                       passwordConfirmation:
                                           _passwordConfirmController.text,
